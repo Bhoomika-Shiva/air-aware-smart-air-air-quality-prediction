@@ -1,0 +1,53 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from prophet import Prophet
+
+#Create sample data
+
+data={"Date":["2024-01-01","2024-01-02","2024-01-03","2024-01-04","2024-01-05","2024-01-06","2024-01-07","2024-01-08","2024-01-09","2024-01-10"],"AQI":[120,130,128,140,150,160,155,165,170,175]}
+
+df=pd.DataFrame(data)
+
+print("ORIGINAL DATA:")
+print(df)
+
+#Preprocessing(prophet format)
+#Prophet requires columns:ds(date),y(value)
+
+df["Date"]=pd.to_datetime(df["Date"])
+
+df=df.rename(columns={"Date":"ds","AQI":"y"})
+print("\nData prepared for Prophet:")
+print(df)
+
+#Create & train model
+
+model=Prophet()
+model.fit(df)
+
+#create future dates(next 7days)
+
+future=model.make_future_dataframe(periods=7)
+
+print("\nFuture Dates:")
+print(future.tail())
+
+#Make forecast
+
+forecast=model.predict(future)
+
+print("\nPredicted AQI(Next 7 Days):")
+print(forecast[["ds","yhat"]].tail(7))
+
+#Plot forecast
+
+model.plot(forecast)
+plt.title("Future AQI Prediction")
+plt.xlabel("Date")
+plt.ylabel("AQI")
+plt.show()
+
+#Show trend & seasonal cpmponents
+
+model.plot_components(forecast)
+plt.show()
